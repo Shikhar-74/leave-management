@@ -7,15 +7,11 @@ import {
   CalendarPlus,
   CalendarDays,
   BarChart3,
+  User,
+  Users,
   X,
 } from 'lucide-react';
-
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/apply-leave', label: 'Apply Leave', icon: CalendarPlus },
-  { href: '/my-leaves', label: 'My Leaves', icon: CalendarDays },
-  { href: '/leave-balance', label: 'Leave Balance', icon: BarChart3 },
-];
+import { useAuthStore } from '@/store/auth.store';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -24,6 +20,18 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const { employee } = useAuthStore();
+
+  const navItems = [
+    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/profile', label: 'My Profile', icon: User },
+    { href: '/apply-leave', label: 'Apply Leave', icon: CalendarPlus },
+    { href: '/my-leaves', label: 'My Leaves', icon: CalendarDays },
+    { href: '/leave-balance', label: 'Leave Balance', icon: BarChart3 },
+    ...(employee?.role === 'ADMIN'
+      ? [{ href: '/employees', label: 'Employees', icon: Users }]
+      : []),
+  ];
 
   return (
     <>

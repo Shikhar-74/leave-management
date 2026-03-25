@@ -5,18 +5,13 @@ import { env } from './config';
 import authRoutes from './routes/auth.routes';
 import leaveBalanceRoutes from './routes/leave-balance.routes';
 import leaveRoutes from './routes/leave.routes';
+import profileRoutes from './routes/profile.routes';
 import employeeRoutes from './routes/employee.routes';
 import leavePolicyRoutes from './routes/leave-policy.routes';
 import { errorHandler } from './middlewares/error-handler';
 
 /**
  * Express application entry point.
- *
- * Middleware pipeline:
- *  1. CORS
- *  2. JSON body parser
- *  3. Feature routes
- *  4. Global error handler (must be last)
  */
 const app = express();
 
@@ -31,6 +26,7 @@ app.get('/', (_req: Request, res: Response) => {
 
 // ── Feature routes ───────────────────────────────────────────────
 app.use(authRoutes);                 // POST /api/v1/auth/signup|login|logout|refresh
+app.use(profileRoutes);              // GET|PUT /api/v1/profile, GET /api/v1/employees, DELETE /api/v1/profile/:id
 app.use(leaveBalanceRoutes);         // GET  /api/v1/employees/:id/leave-balance
 app.use(leaveRoutes);                // POST /api/v1/leaves/apply, GET /my, GET /:id, PATCH /:id/cancel
 app.use(employeeRoutes);             // POST /api/v1/employees  (utility — seed employees)

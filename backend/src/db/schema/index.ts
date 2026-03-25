@@ -7,6 +7,8 @@ import { employees, roleEnum } from './employees';
 import { leavePolicy } from './leave-policy';
 import { leaveRecords, leaveTypeEnum, leaveStatusEnum } from './leave-records';
 import { refreshTokens } from './refresh-tokens';
+import { employeeProfiles, genderEnum, maritalStatusEnum } from './employee-profiles';
+import { auditLogs } from './audit-logs';
 
 // ── Re-export tables & enums ────────────────────────────────────
 export {
@@ -17,17 +19,24 @@ export {
   leaveTypeEnum,
   leaveStatusEnum,
   refreshTokens,
+  employeeProfiles,
+  genderEnum,
+  maritalStatusEnum,
+  auditLogs,
 };
 
 // ── Relations ───────────────────────────────────────────────────
 
-/** An employee has many leave records. */
-export const employeesRelations = relations(employees, ({ many }) => ({
+export const employeesRelations = relations(employees, ({ many, one }) => ({
   leaveRecords: many(leaveRecords),
   refreshTokens: many(refreshTokens),
+  profile: one(employeeProfiles, {
+    fields: [employees.id],
+    references: [employeeProfiles.employeeId],
+  }),
+  auditLogs: many(auditLogs),
 }));
 
-/** A leave record belongs to one employee. */
 export const leaveRecordsRelations = relations(leaveRecords, ({ one }) => ({
   employee: one(employees, {
     fields: [leaveRecords.employeeId],
@@ -35,10 +44,23 @@ export const leaveRecordsRelations = relations(leaveRecords, ({ one }) => ({
   }),
 }));
 
-/** A refresh token belongs to one employee. */
 export const refreshTokensRelations = relations(refreshTokens, ({ one }) => ({
   employee: one(employees, {
     fields: [refreshTokens.employeeId],
+    references: [employees.id],
+  }),
+}));
+
+export const employeeProfilesRelations = relations(employeeProfiles, ({ one }) => ({
+  employee: one(employees, {
+    fields: [employeeProfiles.employeeId],
+    references: [employees.id],
+  }),
+}));
+
+export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
+  employee: one(employees, {
+    fields: [auditLogs.employeeId],
     references: [employees.id],
   }),
 }));

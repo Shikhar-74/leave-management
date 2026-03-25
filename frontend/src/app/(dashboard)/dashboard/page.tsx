@@ -23,22 +23,20 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!employee) return;
 
-    const fetchData = async () => {
-      try {
-        const year = new Date().getFullYear();
-        const [balanceRes, leavesRes] = await Promise.all([
-          leaveService.getBalance(employee.id, year),
-          leaveService.getMyLeaves({ limit: 5, year }),
-        ]);
-        setBalance(balanceRes.data);
-        setRecentLeaves(leavesRes.data.leaves);
-      } catch {
-        // Balance may 404 if no policy — handle gracefully
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    const year = new Date().getFullYear();
+
+    // Fetch balance — may 404 if no leave policy
+    leaveService
+      .getBalance(employee.id, year)
+      .then((res) => setBalance(res.data))
+      .catch(() => {});
+
+    // Fetch recent leaves — independent of balance
+    leaveService
+      .getMyLeaves({ limit: 5, year })
+      .then((res) => setRecentLeaves(res.data.leaves))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [employee]);
 
   const stats = [
