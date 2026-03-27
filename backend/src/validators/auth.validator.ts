@@ -18,13 +18,14 @@ export const signupSchema = z
     name: z
       .string({ message: 'name must be a string' })
       .min(2, 'name must be at least 2 characters')
-      .max(100, 'name must be at most 100 characters'),
+      .max(100, 'name must be at most 100 characters')
+      .regex(/^[A-Za-z\s'\-]+$/, 'name must contain only letters, spaces, hyphens, or apostrophes'),
     email: z
       .string({ message: 'email is required' })
       .email('Invalid email format')
       .max(255),
     password: passwordSchema,
-    role: z.enum(['EMPLOYEE', 'ADMIN']).optional(),
+    role: z.enum(['EMPLOYEE', 'ADMIN']),
     department: z.string().max(100, 'department must be at most 100 characters').optional(),
   })
   .strict();
@@ -37,7 +38,7 @@ export type SignupInput = z.infer<typeof signupSchema>;
 export const loginSchema = z.object({
   email: z.string({ message: 'email is required' }).email('Invalid email format'),
   password: z.string({ message: 'password is required' }).min(1, 'password is required'),
-});
+}).strict();
 
 export type LoginInput = z.infer<typeof loginSchema>;
 
@@ -48,7 +49,7 @@ export const logoutSchema = z.object({
   refresh_token: z
     .string({ message: 'refresh_token is required' })
     .min(1, 'refresh_token is required'),
-});
+}).strict();
 
 export type LogoutInput = z.infer<typeof logoutSchema>;
 
@@ -59,6 +60,6 @@ export const refreshSchema = z.object({
   refresh_token: z
     .string({ message: 'refresh_token is required' })
     .min(1, 'refresh_token is required'),
-});
+}).strict();
 
 export type RefreshInput = z.infer<typeof refreshSchema>;

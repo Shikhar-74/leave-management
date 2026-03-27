@@ -19,7 +19,10 @@ export const leaveStatusEnum = pgEnum('leave_status', [
 
 /**
  * leave_records table — individual leave entries (one row = one day of leave).
- * Composite index on (employee_id, leave_date) for the primary query path.
+ *
+ * Indexes:
+ *  - idx_leave_records_emp_date(employee_id, leave_date) — primary query path
+ *  - idx_leave_records_status(status) — for filtering by leave status
  */
 export const leaveRecords = pgTable(
   'leave_records',
@@ -36,5 +39,6 @@ export const leaveRecords = pgTable(
   },
   (table) => [
     index('idx_leave_records_emp_date').on(table.employeeId, table.leaveDate),
+    index('idx_leave_records_status').on(table.status),
   ],
 );

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { leaveBalanceQuerySchema } from '../validators/leave-balance.validator';
 import { getLeaveBalance } from '../services/leave-balance.service';
+import { ZodError } from 'zod';
 
 /**
  * GET /api/v1/employees/:employeeId/leave-balance?year=YYYY
@@ -30,6 +31,29 @@ export async function getLeaveBalanceController(
     const data = await getLeaveBalance(employeeId, year);
     res.status(200).json(data);
   } catch (error) {
+    // Map Zod validation errors to spec-specific error codes
+    if (error instanceof ZodError) {
+      const firstIssue = error.issues[0];
+      const path = firstIssue?.path?.[0];
+
+      if (path === 'employeeId') {
+        res.status(400).json({
+          error: 'INVALID_EMPLOYEE_ID',
+          message: firstIssue.message,
+          status: 400,
+        });
+        return;
+      }
+
+      if (path === 'year') {
+        res.status(400).json({
+          error: 'INVALID_YEAR',
+          message: firstIssue.message,
+          status: 400,
+        });
+        return;
+      }
+    }
     next(error);
   }
 }

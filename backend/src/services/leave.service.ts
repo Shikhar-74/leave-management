@@ -5,7 +5,7 @@ import { AppError } from '../middlewares/error-handler';
 import type { ApplyLeaveInput, GetMyLeavesQuery } from '../validators/leave.validator';
 
 /**
- * Calculate working days (Mon–Sat) between two dates, excluding Sundays.
+ * Calculate working days (Mon–Fri) between two dates, excluding Saturdays and Sundays.
  * Returns an array of YYYY-MM-DD date strings for each working day.
  */
 function getWorkingDays(startDate: Date, endDate: Date): string[] {
@@ -13,8 +13,9 @@ function getWorkingDays(startDate: Date, endDate: Date): string[] {
   const current = new Date(startDate);
 
   while (current <= endDate) {
-    // 0 = Sunday — exclude
-    if (current.getDay() !== 0) {
+    const day = current.getDay();
+    // 0 = Sunday, 6 = Saturday — exclude both
+    if (day !== 0 && day !== 6) {
       const yyyy = current.getFullYear();
       const mm = String(current.getMonth() + 1).padStart(2, '0');
       const dd = String(current.getDate()).padStart(2, '0');
@@ -105,7 +106,7 @@ export async function applyLeave(employeeId: number, data: ApplyLeaveInput) {
     throw new AppError(
       409,
       'DATE_CONFLICT',
-      `Overlapping leave found on date(s): ${conflicts.map((c) => c.leaveDate).join(', ')}`,
+      `Overlapping leave found (leave_id: ${conflicts[0].id}) on date(s): ${conflicts.map((c) => c.leaveDate).join(', ')}`,
     );
   }
 
@@ -272,10 +273,10 @@ export async function cancelLeave(leaveId: number, requesterId: number, requeste
     throw new AppError(409, 'ALREADY_CANCELLED', 'Leave is already cancelled');
   }
 
-  // Only PENDING can be cancelled
+  // Only PENDING can be cancelled — APPROVED or REJECTED → 409
   if (record.status !== 'PENDING') {
     throw new AppError(
-      400,
+      409,
       'INVALID_STATUS',
       `Cannot cancel a leave with status ${record.status}. Only PENDING leaves can be cancelled`,
     );

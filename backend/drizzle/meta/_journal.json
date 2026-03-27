@@ -8,6 +8,13 @@
       "when": 1774453741087,
       "tag": "0000_big_sentinels",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774532952502,
+      "tag": "0001_violet_blonde_phantom",
+      "breakpoints": true
     }
   ]
 }

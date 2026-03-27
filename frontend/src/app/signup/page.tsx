@@ -20,6 +20,7 @@ const signupSchema = z.object({
     .regex(/[A-Z]/, 'Need at least 1 uppercase letter')
     .regex(/[0-9]/, 'Need at least 1 digit')
     .regex(/[!@#$%^&*]/, 'Need at least 1 special character (!@#$%^&*)'),
+  role: z.enum(['EMPLOYEE', 'ADMIN'], { message: 'Please select a role' }),
   department: z.string().max(100).optional(),
 });
 
@@ -133,15 +134,28 @@ export default function SignupPage() {
             </div>
 
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Role</label>
+              <select
+                {...register('role')}
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all text-gray-900"
+              >
+                <option value="">Select a role</option>
+                <option value="EMPLOYEE">Employee</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+              {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>}
+            </div>
+
+            {/* <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Department <span className="text-gray-400">(optional)</span>
               </label>
               <input
                 {...register('department')}
                 placeholder="Engineering"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all text-gray-900"
               />
-            </div>
+            </div> */}
 
             <button
               type="submit"

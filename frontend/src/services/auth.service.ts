@@ -19,7 +19,7 @@ export interface SignupPayload {
   name: string;
   email: string;
   password: string;
-  role?: string;
+  role: string;
   department?: string;
 }
 

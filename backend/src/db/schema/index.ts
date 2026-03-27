@@ -35,6 +35,14 @@ export const employeesRelations = relations(employees, ({ many, one }) => ({
     references: [employeeProfiles.employeeId],
   }),
   auditLogs: many(auditLogs),
+  // Self-reference: employee reports to manager
+  manager: one(employees, {
+    fields: [employees.managerId],
+    references: [employees.id],
+    relationName: 'manager',
+  }),
+  // Self-reference: manager has direct reports
+  directReports: many(employees, { relationName: 'manager' }),
 }));
 
 export const leaveRecordsRelations = relations(leaveRecords, ({ one }) => ({
@@ -62,5 +70,11 @@ export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
   employee: one(employees, {
     fields: [auditLogs.employeeId],
     references: [employees.id],
+    relationName: 'auditLogActor',
+  }),
+  targetEmployee: one(employees, {
+    fields: [auditLogs.targetEmployeeId],
+    references: [employees.id],
+    relationName: 'auditLogTarget',
   }),
 }));

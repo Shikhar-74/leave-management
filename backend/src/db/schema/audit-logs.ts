@@ -3,6 +3,9 @@ import { employees } from './employees';
 
 /**
  * audit_logs table — tracks profile updates and sensitive operations.
+ *
+ * - employee_id: who triggered the action (CASCADE DELETE)
+ * - target_employee_id: whose profile was affected (SET NULL on delete)
  */
 export const auditLogs = pgTable(
   'audit_logs',
@@ -12,7 +15,8 @@ export const auditLogs = pgTable(
       .notNull()
       .references(() => employees.id, { onDelete: 'cascade' }),
     actionType: varchar('action_type', { length: 50 }).notNull(),
-    targetEmployeeId: integer('target_employee_id'),
+    targetEmployeeId: integer('target_employee_id')
+      .references(() => employees.id, { onDelete: 'set null' }),
     changes: json('changes'),
     reason: varchar('reason', { length: 500 }),
     ipAddress: varchar('ip_address', { length: 45 }),

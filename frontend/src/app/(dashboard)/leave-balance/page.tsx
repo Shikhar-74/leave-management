@@ -76,7 +76,7 @@ export default function LeaveBalancePage() {
                 <CalendarCheck className="w-5 h-5 text-amber-600" />
               </div>
               <p className="text-3xl font-bold text-gray-900">{balance.leaves_taken}</p>
-              <p className="text-sm text-gray-500 mt-1">Leaves Taken</p>
+              <p className="text-sm text-gray-500 mt-1">Applied / Pending</p>
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
@@ -92,7 +92,7 @@ export default function LeaveBalancePage() {
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-900">Leave Usage</h3>
-              <span className="text-sm text-gray-500">{usagePercent}% used</span>
+              <span className="text-sm text-gray-500">{usagePercent}% reserved</span>
             </div>
             <div className="w-full bg-gray-100 rounded-full h-3">
               <div

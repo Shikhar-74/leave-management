@@ -4,7 +4,9 @@ import { z } from 'zod';
  * Update profile — partial updates allowed, all fields optional.
  */
 export const updateProfileSchema = z.object({
-  name: z.string().min(2).max(100).optional(),
+  name: z.string().min(2).max(100)
+    .regex(/[A-Za-z]/, 'name must contain at least one letter')
+    .optional(),
   email: z.string().email('Invalid email format').max(255).optional(),
   phone_number: z.string().max(20).optional().nullable(),
   designation: z.string().max(100).optional().nullable(),
@@ -33,7 +35,7 @@ export const updateProfileSchema = z.object({
     .regex(/[0-9]/, '1 digit required')
     .regex(/[!@#$%^&*]/, '1 special character required')
     .optional(),
-});
+}).strict();
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 

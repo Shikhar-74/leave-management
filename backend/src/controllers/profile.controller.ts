@@ -7,6 +7,7 @@ import {
   deleteProfileQuerySchema,
 } from '../validators/profile.validator';
 import { AppError } from '../middlewares/error-handler';
+import { ZodError } from 'zod';
 
 /**
  * GET /api/v1/profile — Get own profile.
@@ -27,22 +28,41 @@ export async function getProfile(req: Request, res: Response, next: NextFunction
 export async function updateProfile(req: Request, res: Response, next: NextFunction) {
   try {
     const employeeId = req.employee!.id;
-    const parsed = updateProfileSchema.safeParse(req.body);
 
-    if (!parsed.success) {
-      throw new AppError(
-        400,
-        'VALIDATION_ERROR',
-        parsed.error.issues.map((e: { message: string }) => e.message).join(', '),
-      );
+    let parsed: import('../validators/profile.validator').UpdateProfileInput;
+    try {
+      parsed = updateProfileSchema.parse(req.body);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        const issue = err.issues[0];
+        const path = issue?.path?.[0] as string;
+
+        // Map to spec-specific error codes
+        if (path === 'email') {
+          throw new AppError(400, 'INVALID_EMAIL_FORMAT', issue.message);
+        }
+        if (path === 'password') {
+          throw new AppError(400, 'PASSWORD_TOO_WEAK', issue.message);
+        }
+        if (path === 'profile_photo_url') {
+          throw new AppError(400, 'INVALID_URL', issue.message);
+        }
+        // All other validation errors
+        throw new AppError(
+          400,
+          'VALIDATION_ERROR',
+          err.issues.map((e: { message: string }) => e.message).join(', '),
+        );
+      }
+      throw err;
     }
 
     // EMPLOYEE cannot update date_of_birth
-    if (req.employee!.role === 'EMPLOYEE' && parsed.data.date_of_birth !== undefined) {
+    if (req.employee!.role === 'EMPLOYEE' && parsed.date_of_birth !== undefined) {
       throw new AppError(403, 'INSUFFICIENT_PERMISSIONS', 'Employees cannot update date of birth');
     }
 
-    const result = await profileService.updateProfile(employeeId, parsed.data, {
+    const result = await profileService.updateProfile(employeeId, parsed, {
       ip: req.ip,
       userAgent: req.headers['user-agent'],
     });
@@ -63,16 +83,31 @@ export async function getAllEmployees(req: Request, res: Response, next: NextFun
       throw new AppError(403, 'FORBIDDEN', 'Only admins can access employee list');
     }
 
-    const parsed = getAllEmployeesQuerySchema.safeParse(req.query);
-    if (!parsed.success) {
-      throw new AppError(
-        400,
-        'VALIDATION_ERROR',
-        parsed.error.issues.map((e: { message: string }) => e.message).join(', '),
-      );
+    let parsed: import('../validators/profile.validator').GetAllEmployeesQuery;
+    try {
+      parsed = getAllEmployeesQuerySchema.parse(req.query);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        const issue = err.issues[0];
+        const path = issue?.path?.[0] as string;
+
+        // Map to spec-specific error codes
+        const errorCodeMap: Record<string, string> = {
+          page: 'INVALID_PAGE',
+          limit: 'INVALID_LIMIT',
+          role: 'INVALID_ROLE_FILTER',
+          status: 'INVALID_STATUS_FILTER',
+          sort_by: 'INVALID_SORT_BY',
+          sort_order: 'INVALID_SORT_ORDER',
+        };
+
+        const code = errorCodeMap[path] || 'VALIDATION_ERROR';
+        throw new AppError(400, code, issue.message);
+      }
+      throw err;
     }
 
-    const result = await profileService.getAllEmployees(parsed.data);
+    const result = await profileService.getAllEmployees(parsed);
     res.json(result);
   } catch (err) {
     next(err);
@@ -94,8 +129,12 @@ export async function deleteProfile(req: Request, res: Response, next: NextFunct
       throw new AppError(400, 'INVALID_EMPLOYEE_ID', 'employee_id must be a positive integer');
     }
 
+    // Validate reason — reject if too long
     const queryParsed = deleteProfileQuerySchema.safeParse(req.query);
-    const reason = queryParsed.success ? queryParsed.data.reason : undefined;
+    if (!queryParsed.success) {
+      throw new AppError(400, 'REASON_TOO_LONG', 'reason must be at most 500 characters');
+    }
+    const reason = queryParsed.data.reason;
 
     const result = await profileService.deleteProfile(
       req.employee!.id,

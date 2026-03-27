@@ -10,7 +10,6 @@ export interface ProfileData {
   phone_number: string | null;
   designation: string | null;
   manager_id: number | null;
-  is_active: boolean;
   profile_photo_url: string | null;
   bio: string | null;
   address: string | null;

@@ -14,7 +14,7 @@ export const applyLeaveSchema = z.object({
     message: 'leave_type must be SICK, CASUAL, or EARNED',
   }),
   reason: z.string().max(500, 'reason must be at most 500 characters').optional(),
-});
+}).strict();
 
 export type ApplyLeaveInput = z.infer<typeof applyLeaveSchema>;
 

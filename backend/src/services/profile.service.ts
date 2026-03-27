@@ -45,7 +45,6 @@ export async function getProfile(employeeId: number) {
     phone_number: employee.phoneNumber,
     designation: employee.designation,
     manager_id: employee.managerId,
-    is_active: employee.isActive,
     profile_photo_url: profile?.profilePhotoUrl ?? null,
     bio: profile?.bio ?? null,
     address: profile?.address ?? null,
@@ -59,8 +58,8 @@ export async function getProfile(employeeId: number) {
     emergency_contact_name: profile?.emergencyContactName ?? null,
     emergency_contact_phone: profile?.emergencyContactPhone ?? null,
     emergency_contact_relationship: profile?.emergencyContactRelationship ?? null,
-    created_at: employee.createdAt,
-    updated_at: employee.updatedAt,
+    created_at: employee.createdAt.toISOString(),
+    updated_at: (employee.updatedAt ?? employee.createdAt).toISOString(),
   };
 }
 
@@ -209,12 +208,13 @@ export async function getAllEmployees(query: GetAllEmployeesQuery) {
     conditions.push(eq(employees.department, department));
   }
 
-  // Search filter
+  // Search filter — escape SQL wildcards as literal characters
   if (search && search.trim()) {
+    const sanitized = search.replace(/%/g, '\\%').replace(/_/g, '\\_');
     conditions.push(
       or(
-        ilike(employees.name, `%${search}%`),
-        ilike(employees.email, `%${search}%`),
+        ilike(employees.name, `%${sanitized}%`),
+        ilike(employees.email, `%${sanitized}%`),
       ),
     );
   }

@@ -83,21 +83,37 @@ export async function signup(data: SignupInput) {
   const passwordHash = await bcrypt.hash(data.password, SALT_ROUNDS);
 
   // Insert employee
-  const [employee] = await db
-    .insert(employees)
-    .values({
-      name: data.name,
-      email: emailLower,
-      passwordHash,
-      role: data.role || 'EMPLOYEE',
-      department: data.department || null,
-    })
-    .returning({
-      id: employees.id,
-      name: employees.name,
-      email: employees.email,
-      role: employees.role,
-    });
+  let employee;
+  try {
+    const [inserted] = await db
+      .insert(employees)
+      .values({
+        name: data.name,
+        email: emailLower,
+        passwordHash,
+        role: data.role || 'EMPLOYEE',
+        department: data.department || null,
+      })
+      .returning({
+        id: employees.id,
+        name: employees.name,
+        email: employees.email,
+        role: employees.role,
+      });
+    employee = inserted;
+  } catch (err: unknown) {
+    // Let connection errors bubble up to render as 503
+    if (
+      err instanceof Error &&
+      (
+        (err as any).code === 'ECONNREFUSED' ||
+        err.message?.toLowerCase().includes('connection')
+      )
+    ) {
+      throw err;
+    }
+    throw new AppError(500, 'INTERNAL_ERROR', 'Failed to create employee account');
+  }
 
   // Generate tokens
   const accessToken = generateAccessToken(employee.id, employee.role);
