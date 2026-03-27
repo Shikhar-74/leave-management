@@ -8,7 +8,10 @@ export const updateProfileSchema = z.object({
     .regex(/[A-Za-z]/, 'name must contain at least one letter')
     .optional(),
   email: z.string().email('Invalid email format').max(255).optional(),
-  phone_number: z.string().max(20).optional().nullable(),
+  phone_number: z.string().max(20)
+    .regex(/^[0-9+\-\s()]+$/, 'Phone number can only contain digits, spaces, and + - ()')
+    .refine((val) => !/^(\d)\1{7,}$/.test(val.replace(/\D/g, '')), 'Phone number cannot be repeated digits')
+    .optional().nullable(),
   designation: z.string().max(100).optional().nullable(),
   department: z.string().max(100).optional().nullable(),
   manager_id: z.number().int().positive().optional().nullable(),
@@ -26,7 +29,10 @@ export const updateProfileSchema = z.object({
   gender: z.enum(['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY']).optional().nullable(),
   marital_status: z.enum(['SINGLE', 'MARRIED', 'DIVORCED', 'WIDOWED', 'PREFER_NOT_TO_SAY']).optional().nullable(),
   emergency_contact_name: z.string().max(100).optional().nullable(),
-  emergency_contact_phone: z.string().max(20).optional().nullable(),
+  emergency_contact_phone: z.string().max(20)
+    .regex(/^[0-9+\-\s()]+$/, 'Phone number can only contain digits, spaces, and + - ()')
+    .refine((val) => !/^(\d)\1{7,}$/.test(val.replace(/\D/g, '')), 'Phone number cannot be repeated digits')
+    .optional().nullable(),
   emergency_contact_relationship: z.string().max(50).optional().nullable(),
   password: z
     .string()

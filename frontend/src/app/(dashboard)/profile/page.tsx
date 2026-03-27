@@ -43,6 +43,7 @@ export default function ProfilePage() {
       state: profile.state,
       postal_code: profile.postal_code,
       country: profile.country,
+      date_of_birth: profile.date_of_birth,
       gender: profile.gender,
       marital_status: profile.marital_status,
       emergency_contact_name: profile.emergency_contact_name,
@@ -166,6 +167,15 @@ export default function ProfilePage() {
                   value={form.department ?? ''}
                   onChange={(e) => handleChange('department', e.target.value)}
                   placeholder="Engineering"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Date of Birth</label>
+                <input
+                  type="date"
+                  value={form.date_of_birth ?? ''}
+                  onChange={(e) => handleChange('date_of_birth', e.target.value)}
                   className={inputClass}
                 />
               </div>

@@ -39,6 +39,7 @@ export interface UpdateProfilePayload {
   state?: string | null;
   postal_code?: string | null;
   country?: string | null;
+  date_of_birth?: string | null;
   gender?: string | null;
   marital_status?: string | null;
   emergency_contact_name?: string | null;

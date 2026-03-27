@@ -27,12 +27,25 @@ export async function getLeaveBalance(
   }
 
   // ── 2. Leave policy lookup ────────────────────────────────────
-  const policy = await db.query.leavePolicy.findFirst({
+  let policy = await db.query.leavePolicy.findFirst({
     where: eq(leavePolicy.year, year),
   });
 
   if (!policy) {
-    throw new AppError(404, 'NO_POLICY_FOR_YEAR', `No leave policy found for year ${year}`);
+    // Auto-create default policy of 24 leaves
+    const [newPolicy] = await db
+      .insert(leavePolicy)
+      .values({ year, totalLeave: 24 })
+      .onConflictDoNothing({ target: leavePolicy.year })
+      .returning();
+
+    policy = newPolicy || (await db.query.leavePolicy.findFirst({
+      where: eq(leavePolicy.year, year),
+    }));
+  }
+
+  if (!policy) {
+    throw new AppError(500, 'INTERNAL_ERROR', `Failed to create leave policy for year ${year}`);
   }
 
   const totalLeaves = policy.totalLeave;

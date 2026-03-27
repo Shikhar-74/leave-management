@@ -57,10 +57,7 @@ export async function updateProfile(req: Request, res: Response, next: NextFunct
       throw err;
     }
 
-    // EMPLOYEE cannot update date_of_birth
-    if (req.employee!.role === 'EMPLOYEE' && parsed.date_of_birth !== undefined) {
-      throw new AppError(403, 'INSUFFICIENT_PERMISSIONS', 'Employees cannot update date of birth');
-    }
+    // (Removed EMPLOYEE date_of_birth restriction as requested)
 
     const result = await profileService.updateProfile(employeeId, parsed, {
       ip: req.ip,
