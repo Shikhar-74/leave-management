@@ -4,6 +4,7 @@ import {
   employeeProfiles,
   refreshTokens,
   auditLogs,
+  employeeSkills,
 } from '../db/schema';
 import { eq, and, ilike, or, asc, desc, sql, count } from 'drizzle-orm';
 import { AppError } from '../middlewares/error-handler';
@@ -58,6 +59,18 @@ export async function getProfile(employeeId: number) {
     emergency_contact_name: profile?.emergencyContactName ?? null,
     emergency_contact_phone: profile?.emergencyContactPhone ?? null,
     emergency_contact_relationship: profile?.emergencyContactRelationship ?? null,
+
+    // Attach skills
+    skills: (await db
+      .select({
+        id: employeeSkills.id,
+        skill_name: employeeSkills.skillName,
+        proficiency: employeeSkills.proficiency,
+        created_at: employeeSkills.createdAt,
+      })
+      .from(employeeSkills)
+      .where(eq(employeeSkills.employeeId, employeeId))
+      .orderBy(desc(employeeSkills.createdAt))),
     created_at: employee.createdAt.toISOString(),
     updated_at: (employee.updatedAt ?? employee.createdAt).toISOString(),
   };

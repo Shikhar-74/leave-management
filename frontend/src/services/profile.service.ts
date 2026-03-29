@@ -1,5 +1,13 @@
 import api from '@/lib/api';
 
+export interface Skill {
+  id: number;
+  employee_id: number;
+  skill_name: string;
+  proficiency: number;
+  created_at: string;
+}
+
 export interface ProfileData {
   id: number;
   name: string;
@@ -23,8 +31,14 @@ export interface ProfileData {
   emergency_contact_name: string | null;
   emergency_contact_phone: string | null;
   emergency_contact_relationship: string | null;
+  skills?: Skill[];
   created_at: string;
   updated_at: string;
+}
+
+export interface AddSkillPayload {
+  skill_name: string;
+  proficiency: number;
 }
 
 export interface UpdateProfilePayload {
@@ -87,4 +101,7 @@ export const profileService = {
 
   deleteEmployee: (employeeId: number, reason?: string) =>
     api.delete(`/profile/${employeeId}`, { params: reason ? { reason } : undefined }),
+
+  addSkill: (employeeId: number, data: AddSkillPayload) =>
+    api.post<Skill>(`/employees/${employeeId}/skills`, data),
 };

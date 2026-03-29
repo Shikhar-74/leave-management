@@ -15,6 +15,10 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<UpdateProfilePayload>({});
 
+  const [newSkillName, setNewSkillName] = useState('');
+  const [newSkillProficiency, setNewSkillProficiency] = useState<number>(3);
+  const [addingSkill, setAddingSkill] = useState(false);
+
   useEffect(() => {
     fetchProfile();
   }, []);
@@ -70,6 +74,28 @@ export default function ProfilePage() {
 
   const handleChange = (field: keyof UpdateProfilePayload, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value || null }));
+  };
+
+  const handleAddSkill = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profile || !newSkillName.trim()) return;
+
+    try {
+      setAddingSkill(true);
+      await profileService.addSkill(profile.id, {
+        skill_name: newSkillName,
+        proficiency: newSkillProficiency,
+      });
+      fetchProfile();
+      setNewSkillName('');
+      setNewSkillProficiency(3);
+      toast.success('Skill added successfully');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Failed to add skill');
+    } finally {
+      setAddingSkill(false);
+    }
   };
 
   if (loading) {
@@ -366,6 +392,54 @@ export default function ProfilePage() {
             <InfoRow label="Name" value={profile.emergency_contact_name} />
             <InfoRow label="Phone" value={profile.emergency_contact_phone} />
             <InfoRow label="Relationship" value={profile.emergency_contact_relationship} />
+          </div>
+
+          {/* Skills */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+            <h3 className="font-semibold text-gray-900 mb-4">Skills</h3>
+            
+            <form onSubmit={handleAddSkill} className="flex flex-col sm:flex-row gap-3 mb-6">
+              <input
+                type="text"
+                placeholder="E.g. JavaScript"
+                value={newSkillName}
+                onChange={(e) => setNewSkillName(e.target.value)}
+                className="flex-1 px-4 py-2 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400"
+              />
+              <select
+                value={newSkillProficiency}
+                onChange={(e) => setNewSkillProficiency(Number(e.target.value))}
+                className="w-full sm:w-40 px-4 py-2 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400"
+              >
+                <option value={1}>Beginner (1)</option>
+                <option value={2}>Novice (2)</option>
+                <option value={3}>Intermediate (3)</option>
+                <option value={4}>Advanced (4)</option>
+                <option value={5}>Expert (5)</option>
+              </select>
+              <button
+                type="submit"
+                disabled={addingSkill || !newSkillName.trim()}
+                className="px-6 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors whitespace-nowrap"
+              >
+                {addingSkill ? 'Adding...' : 'Add Skill'}
+              </button>
+            </form>
+
+            {profile.skills && profile.skills.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {profile.skills.map((skill) => (
+                  <div key={skill.id} className="px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-900 capitalize">{skill.skill_name}</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-semibold">
+                      Lvl {skill.proficiency}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 text-center py-4 bg-gray-50 rounded-xl border border-dashed border-gray-200">No skills added yet.</p>
+            )}
           </div>
         </div>
       )}

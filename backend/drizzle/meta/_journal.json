@@ -15,6 +15,13 @@
       "when": 1774532952502,
       "tag": "0001_violet_blonde_phantom",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774602153864,
+      "tag": "0002_careful_toxin",
+      "breakpoints": true
     }
   ]
 }

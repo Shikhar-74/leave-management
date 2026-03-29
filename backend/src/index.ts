@@ -24,9 +24,12 @@ app.get('/', (_req: Request, res: Response) => {
   res.json({ status: 'ok', message: `Server is running on port ${env.PORT}` });
 });
 
+import skillRoutes from './routes/skill.routes';
+
 // ── Feature routes ───────────────────────────────────────────────
 app.use(authRoutes);                 // POST /api/v1/auth/signup|login|logout|refresh
 app.use(profileRoutes);              // GET|PUT /api/v1/profile, GET /api/v1/employees, DELETE /api/v1/profile/:id
+app.use(skillRoutes);                // POST|GET /api/v1/employees/:id/skills
 app.use(leaveBalanceRoutes);         // GET  /api/v1/employees/:id/leave-balance
 app.use(leaveRoutes);                // POST /api/v1/leaves/apply, GET /my, GET /:id, PATCH /:id/cancel
 app.use(employeeRoutes);             // POST /api/v1/employees  (utility — seed employees)

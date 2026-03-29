@@ -9,6 +9,7 @@ import { leaveRecords, leaveTypeEnum, leaveStatusEnum } from './leave-records';
 import { refreshTokens } from './refresh-tokens';
 import { employeeProfiles, genderEnum, maritalStatusEnum } from './employee-profiles';
 import { auditLogs } from './audit-logs';
+import { employeeSkills } from './employee-skills';
 
 // ── Re-export tables & enums ────────────────────────────────────
 export {
@@ -23,6 +24,7 @@ export {
   genderEnum,
   maritalStatusEnum,
   auditLogs,
+  employeeSkills,
 };
 
 // ── Relations ───────────────────────────────────────────────────
@@ -34,6 +36,7 @@ export const employeesRelations = relations(employees, ({ many, one }) => ({
     fields: [employees.id],
     references: [employeeProfiles.employeeId],
   }),
+  skills: many(employeeSkills),
   auditLogs: many(auditLogs),
   // Self-reference: employee reports to manager
   manager: one(employees, {
@@ -76,5 +79,12 @@ export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
     fields: [auditLogs.targetEmployeeId],
     references: [employees.id],
     relationName: 'auditLogTarget',
+  }),
+}));
+
+export const employeeSkillsRelations = relations(employeeSkills, ({ one }) => ({
+  employee: one(employees, {
+    fields: [employeeSkills.employeeId],
+    references: [employees.id],
   }),
 }));
