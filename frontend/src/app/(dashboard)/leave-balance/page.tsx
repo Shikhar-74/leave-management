@@ -98,10 +98,10 @@ export default function LeaveBalancePage() {
               <div
                 className={`h-3 rounded-full transition-all duration-500 ${
                   usagePercent > 80
-                    ? 'bg-gradient-to-r from-red-400 to-red-500'
+                    ? 'bg-linear-to-r from-red-400 to-red-500'
                     : usagePercent > 50
-                      ? 'bg-gradient-to-r from-amber-400 to-orange-400'
-                      : 'bg-gradient-to-r from-indigo-400 to-purple-500'
+                      ? 'bg-linear-to-r from-amber-400 to-orange-400'
+                      : 'bg-linear-to-r from-indigo-400 to-purple-500'
                 }`}
                 style={{ width: `${Math.min(usagePercent, 100)}%` }}
               />

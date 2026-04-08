@@ -89,7 +89,7 @@ export default function DashboardPage() {
           >
             <div className="flex items-center justify-between mb-3">
               <div className={`w-10 h-10 rounded-xl ${stat.bgLight} flex items-center justify-center`}>
-                <stat.icon className={`w-5 h-5 bg-gradient-to-r ${stat.color} bg-clip-text`} style={{ color: 'inherit' }} />
+                <stat.icon className={`w-5 h-5 bg-linear-to-r ${stat.color} bg-clip-text`} style={{ color: 'inherit' }} />
               </div>
             </div>
             <p className="text-2xl font-bold text-gray-900">
@@ -104,7 +104,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link
           href="/apply-leave"
-          className="group bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-6 text-white hover:from-indigo-600 hover:to-purple-700 transition-all duration-200"
+          className="group bg-linear-to-r from-indigo-500 to-purple-600 rounded-2xl p-6 text-white hover:from-indigo-600 hover:to-purple-700 transition-all duration-200"
         >
           <div className="flex items-center justify-between">
             <div>

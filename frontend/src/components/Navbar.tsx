@@ -50,7 +50,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
       <div className="flex items-center gap-2">
         {/* Profile badge */}
         <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-100">
-          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-full bg-linear-to-br from-indigo-400 to-purple-500 flex items-center justify-center">
             <User className="w-3.5 h-3.5 text-white" />
           </div>
           <div className="hidden sm:block">

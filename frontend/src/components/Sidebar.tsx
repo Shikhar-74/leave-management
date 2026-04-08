@@ -55,7 +55,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Logo */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-100">
           <Link href="/dashboard" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
               <CalendarDays className="w-4.5 h-4.5 text-white" />
             </div>
             <span className="font-semibold text-gray-900 text-lg tracking-tight">LeaveHub</span>
@@ -93,7 +93,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* Footer */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100">
-          <div className="px-3 py-2 rounded-lg bg-gradient-to-r from-indigo-50 to-purple-50">
+          <div className="px-3 py-2 rounded-lg bg-linear-to-br from-indigo-50 to-purple-50">
             <p className="text-xs font-medium text-indigo-700">Leave Management</p>
             <p className="text-xs text-indigo-500 mt-0.5">v1.0.0</p>
           </div>
