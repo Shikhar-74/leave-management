@@ -35,6 +35,7 @@ export const leaveRecords = pgTable(
     leaveType: leaveTypeEnum('leave_type').notNull(),
     status: leaveStatusEnum('leave_status').default('PENDING').notNull(),
     reason: varchar('reason', { length: 500 }),
+    adminRemark: varchar('admin_remark', { length: 500 }),
     appliedAt: timestamp('applied_at').defaultNow().notNull(),
   },
   (table) => [

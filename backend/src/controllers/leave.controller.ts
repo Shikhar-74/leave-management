@@ -120,3 +120,40 @@ export async function cancelLeaveController(
     next(error);
   }
 }
+
+/**
+ * GET /api/v1/leaves/all (Admin)
+ */
+export async function getAllLeavesController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const query = getMyLeavesQuerySchema.parse(req.query);
+    const result = await leaveService.getAllLeaves(query);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * PATCH /api/v1/leaves/:leaveId/process (Admin)
+ */
+import { processLeaveSchema } from '../validators/leave.validator';
+
+export async function processLeaveController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const { leaveId } = leaveIdSchema.parse({ leaveId: req.params.leaveId });
+    const data = processLeaveSchema.parse(req.body);
+    const result = await leaveService.processLeaveRequest(leaveId, data);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+}

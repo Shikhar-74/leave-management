@@ -66,3 +66,32 @@ export function authenticate(req: Request, res: Response, next: NextFunction): v
     });
   }
 }
+
+/**
+ * Role-based authorization middleware.
+ * Should be used AFTER `authenticate` middleware.
+ * Ensures the authenticated user has one of the allowed roles.
+ */
+export function authorizeRole(roles: string[]) {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    if (!req.employee) {
+      res.status(401).json({
+        error: 'UNAUTHORIZED',
+        message: 'Authentication required',
+        status: 401,
+      });
+      return;
+    }
+
+    if (!roles.includes(req.employee.role)) {
+      res.status(403).json({
+        error: 'FORBIDDEN',
+        message: 'You do not have permission to access this resource',
+        status: 403,
+      });
+      return;
+    }
+
+    next();
+  };
+}

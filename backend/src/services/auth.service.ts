@@ -227,6 +227,7 @@ export async function login(data: LoginInput) {
     employee: {
       id: employee.id,
       name: employee.name,
+      email: employee.email,
       role: employee.role,
     },
   };

@@ -144,6 +144,12 @@ export default function MyLeavesPage() {
                   </button>
                 )}
               </div>
+              
+              {leave.admin_remark && (
+                <div className="mt-3 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                  <span className="font-semibold text-gray-700">Admin Remark:</span> {leave.admin_remark}
+                </div>
+              )}
             </div>
           ))}
         </div>

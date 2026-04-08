@@ -190,6 +190,7 @@ export async function getMyLeaves(employeeId: number, query: GetMyLeavesQuery) {
       leave_type: sorted[0].leaveType,
       days_requested: sorted.length,
       status: sorted[0].status,
+      admin_remark: sorted[0].adminRemark,
     };
   });
 
@@ -247,6 +248,7 @@ export async function getLeaveById(leaveId: number, requesterId: number, request
     days_requested: sorted.length,
     status: record.status,
     reason: record.reason,
+    admin_remark: record.adminRemark,
     applied_at: record.appliedAt.toISOString(),
   };
 }
@@ -300,3 +302,125 @@ export async function cancelLeave(leaveId: number, requesterId: number, requeste
     message: 'Leave cancelled successfully',
   };
 }
+
+// ── GET ALL LEAVES (ADMIN ONLY) ───────────────────────────────────
+
+export async function getAllLeaves(query: GetMyLeavesQuery) {
+  const { page, limit, status } = query;
+  const offset = (page - 1) * limit;
+
+  // Build conditions
+  const conditions = [];
+
+  if (status) {
+    conditions.push(eq(leaveRecords.status, status));
+  }
+
+  const allRecordsBuilder = db
+    .select({
+      id: leaveRecords.id,
+      employeeId: leaveRecords.employeeId,
+      leaveDate: leaveRecords.leaveDate,
+      leaveType: leaveRecords.leaveType,
+      status: leaveRecords.status,
+      reason: leaveRecords.reason,
+      adminRemark: leaveRecords.adminRemark,
+      appliedAt: leaveRecords.appliedAt,
+      employeeName: employees.name,
+      employeeEmail: employees.email,
+    })
+    .from(leaveRecords)
+    .leftJoin(employees, eq(leaveRecords.employeeId, employees.id));
+    
+  let allRecords;
+  if(conditions.length > 0) {
+    allRecords = await allRecordsBuilder.where(and(...conditions)).orderBy(desc(leaveRecords.appliedAt));
+  } else {
+    allRecords = await allRecordsBuilder.orderBy(desc(leaveRecords.appliedAt));
+  }
+
+  // Group records by applied_at timestamp to form leave applications
+  const leaveGroups = new Map<string, typeof allRecords>();
+
+  for (const record of allRecords) {
+    const key = `${record.appliedAt.toISOString()}_${record.leaveType}_${record.employeeId}`;
+    if (!leaveGroups.has(key)) {
+      leaveGroups.set(key, []);
+    }
+    leaveGroups.get(key)!.push(record);
+  }
+
+  const leaves = Array.from(leaveGroups.values()).map((group) => {
+    const sorted = group.sort(
+      (a, b) => new Date(a.leaveDate).getTime() - new Date(b.leaveDate).getTime(),
+    );
+    return {
+      leave_id: sorted[0].id,
+      employee_id: sorted[0].employeeId,
+      employee_name: sorted[0].employeeName,
+      employee_email: sorted[0].employeeEmail,
+      start_date: sorted[0].leaveDate,
+      end_date: sorted[sorted.length - 1].leaveDate,
+      leave_type: sorted[0].leaveType,
+      days_requested: sorted.length,
+      status: sorted[0].status,
+      reason: sorted[0].reason,
+      admin_remark: sorted[0].adminRemark,
+      applied_at: sorted[0].appliedAt.toISOString(),
+    };
+  });
+
+  const total = leaves.length;
+  const paginated = leaves.slice(offset, offset + limit);
+
+  return {
+    total,
+    page,
+    limit,
+    leaves: paginated,
+  };
+}
+
+// ── PROCESS LEAVE (APPROVE/REJECT) (ADMIN ONLY) ───────────────────
+
+import type { ProcessLeaveInput } from '../validators/leave.validator';
+
+export async function processLeaveRequest(
+  leaveId: number,
+  data: ProcessLeaveInput,
+) {
+  // Find the record
+  const record = await db.query.leaveRecords.findFirst({
+    where: eq(leaveRecords.id, leaveId),
+  });
+
+  if (!record) {
+    throw new AppError(404, 'LEAVE_NOT_FOUND', `No leave found with id ${leaveId}`);
+  }
+
+  // Only processing PENDING or currently APPROVED/REJECTED is fine? Usually just PENDING.
+  // We'll allow changes if they needed to correct a mistake, unless it's cancelled.
+  if (record.status === 'CANCELLED') {
+    throw new AppError(409, 'INVALID_STATUS', 'Cannot process a cancelled leave');
+  }
+
+  // Update all records from the same application group
+  await db
+    .update(leaveRecords)
+    .set({ status: data.status, adminRemark: data.admin_remark })
+    .where(
+      and(
+        eq(leaveRecords.employeeId, record.employeeId),
+        eq(leaveRecords.appliedAt, record.appliedAt),
+        eq(leaveRecords.leaveType, record.leaveType),
+      ),
+    );
+
+  return {
+    leave_id: leaveId,
+    status: data.status,
+    admin_remark: data.admin_remark,
+    message: `Leave ${data.status.toLowerCase()} successfully`,
+  };
+}
+

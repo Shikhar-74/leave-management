@@ -39,3 +39,15 @@ export const leaveIdSchema = z.object({
     .int('leave_id must be an integer')
     .positive('leave_id must be a positive integer'),
 });
+
+/**
+ * Admin: Process (Approve/Reject) Leave
+ */
+export const processLeaveSchema = z.object({
+  status: z.enum(['APPROVED', 'REJECTED'], {
+    message: 'status must be APPROVED or REJECTED',
+  }),
+  admin_remark: z.string().min(1, 'Admin remark is mandatory').max(500, 'Remark too long'),
+}).strict();
+
+export type ProcessLeaveInput = z.infer<typeof processLeaveSchema>;
